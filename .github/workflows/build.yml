@@ -37,6 +37,9 @@ jobs:
       with:
         xmake-version: branch@dev
 
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
     # Setup compilation mode and install project dependencies
     - name: Configure xmake and install dependencies
       run: xmake config --plat=${{ matrix.confs.plat }} --arch=${{ matrix.confs.arch }} --mode=${{ matrix.confs.mode }} -vD
