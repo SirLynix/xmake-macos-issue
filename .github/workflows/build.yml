@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    paths-ignore:
+      - '.gitignore'
+      - 'LICENSE'
+      - 'CHANGELOG.md'
+      - 'README.md'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        confs:
+          - { name: Windows,      runner: windows-latest, shell: pwsh, plat: windows,  arch: x86,    mode: debug, }
+          - { name: Windows,      runner: windows-latest, shell: pwsh, plat: windows,  arch: x64,    mode: debug, }
+          - { name: Windows,      runner: windows-latest, shell: pwsh, plat: windows,  arch: arm64,  mode: debug, }
+          - { name: Linux,        runner: ubuntu-latest,  shell: bash, plat: linux,    arch: x86_64, mode: debug, }
+          - { name: macOS x86_64, runner: macos-latest,   shell: bash, plat: macosx,   arch: x86_64, mode: debug, }
+          - { name: macOS ARM64,  runner: macos-14,       shell: bash, plat: macosx,   arch: arm64,  mode: debug, }
+
+    defaults:
+      run:
+        shell: ${{ matrix.confs.shell }}
+    
+    name: ${{ matrix.confs.name }} ${{ matrix.confs.arch }} (${{ matrix.confs.mode }})
+    runs-on: ${{ matrix.confs.runner }}
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+
+    steps:
+    # Install xmake
+    - name: Setup xmake
+      uses: xmake-io/github-action-setup-xmake@v1
+      with:
+        xmake-version: branch@dev
+
+    # Setup compilation mode and install project dependencies
+    - name: Configure xmake and install dependencies
+      run: xmake config --plat=${{ matrix.confs.plat }} --arch=${{ matrix.confs.arch }} --mode=${{ matrix.confs.mode }} -vD
+
+    # Build
+    - name: Build
+      run: xmake --yes
