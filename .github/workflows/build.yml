@@ -35,7 +35,7 @@ jobs:
     - name: Setup xmake
       uses: xmake-io/github-action-setup-xmake@v1
       with:
-        xmake-version: branch@dev
+        xmake-version: branch@toolchain
 
     - name: Checkout repository
       uses: actions/checkout@v4
